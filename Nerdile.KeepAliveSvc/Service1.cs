@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.ServiceProcess;
-using System.Threading;
 
 namespace Nerdile.KeepAliveSvc
 {
@@ -30,6 +29,7 @@ namespace Nerdile.KeepAliveSvc
 //            Thread.Sleep(TimeSpan.FromSeconds(10));
             LogFile = System.Configuration.ConfigurationManager.AppSettings["LogFolder"] + @"\" + DateTime.Now.ToString("yyyyMMdd-hhmmss") + ".txt";
             Paths.AddRange(System.Configuration.ConfigurationManager.AppSettings["Paths"].Split(';'));
+            timer.Interval = int.Parse(System.Configuration.ConfigurationManager.AppSettings["Interval"]);
             timer.Enabled = true;
 
             LogMessage("Service started with paths: ");
