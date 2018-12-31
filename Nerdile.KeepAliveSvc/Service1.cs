@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.ServiceProcess;
+using System.Timers;
 
 namespace Nerdile.KeepAliveSvc
 {
@@ -24,27 +25,34 @@ namespace Nerdile.KeepAliveSvc
             }
         }
 
+        private Timer _timer;
+
         protected override void OnStart(string[] args)
         {
 //            Thread.Sleep(TimeSpan.FromSeconds(10));
             LogFile = System.Configuration.ConfigurationManager.AppSettings["LogFolder"] + @"\" + DateTime.Now.ToString("yyyyMMdd-hhmmss") + ".txt";
             Paths.AddRange(System.Configuration.ConfigurationManager.AppSettings["Paths"].Split(';'));
-            timer.Interval = int.Parse(System.Configuration.ConfigurationManager.AppSettings["Interval"]);
-            timer.Enabled = true;
+            var interval = int.Parse(System.Configuration.ConfigurationManager.AppSettings["Interval"]);
 
-            LogMessage("Service started with paths: ");
+            LogMessage("Service started");
+            LogMessage($"Interval: {interval}");
+            LogMessage("Paths: ");
             foreach (var p in Paths)
             {
                 LogMessage(p);
             }
-            timer_Tick(null, null);
+            WritePings();
+
+            _timer = new Timer(interval);
+            _timer.Elapsed += (sender, eventArgs) => WritePings();
+            _timer.Start();
         }
 
         protected override void OnStop()
         {
         }
 
-        private void timer_Tick(object sender, EventArgs e)
+        private void WritePings()
         {
             foreach (var p in Paths)
             {
